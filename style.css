@@ -1,0 +1,362 @@
+* {
+    margin : 0;
+    font-family: "Inter", sans-serif;
+}
+
+
+
+body{
+    background-color: rgb(242, 237, 219);
+}
+a {
+    text-decoration: none;
+    color: black;
+}
+h1 a {
+
+    transition: color 0.5s ease;
+}
+
+a:visited {
+    color: black;
+    text-decoration: none;
+}
+
+h1 a:hover {
+    color: grey;
+}
+
+.site {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x : hidden;
+}
+
+/* menu de nav */
+header {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    
+}
+
+.menuNav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    font-size: x-large;
+    opacity: 0;
+    transition:  opacity 0.2s ease-out
+    
+}
+
+nav a {
+    text-decoration: none;
+}
+
+nav a:visited {
+   color: black;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: grey;
+}
+
+
+.displayNav {
+    opacity: 1;
+    height: 100%;
+}
+
+.searchBar {
+    position: relative;
+    left: 420px;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+    appearance:none;
+    border: 2px solid black;
+    border-radius: 500px;
+}
+
+
+
+
+/* Réduction de la taille */
+.hamburger-box {
+    width: 30px;
+    height: 18px;
+  }
+  
+  .hamburger-inner,
+  .hamburger-inner::before,
+  .hamburger-inner::after {
+    width: 30px;
+    height: 3px;
+  }
+  
+  /* Ajustement de la position verticale des barres */
+  .hamburger-inner::before {
+    top: -8px;
+  }
+  
+  .hamburger-inner::after {
+    bottom: -8px;
+  }
+  
+
+/* index - article aléatoire */
+
+.articleUne {
+    width: 55%;
+    margin: auto;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+.articleUne h2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 300%;
+    cursor: pointer;
+    transition: transform 0.5s ease, color 0.5s ease;
+}
+
+.articleUne h2:hover {
+    transform : scale(1.1);
+    color:rgba(0, 0, 0, 0.531);
+    
+}
+
+.articleUne h2:hover::after {
+    content: "<<";
+    margin-left: 5px;
+}
+
+.articleUne h2:hover::before {
+    content: ">>";
+    margin-right: 5px;
+}
+
+
+.articleUne h3 {
+    display: flex;
+    flex-direction: row;
+    font-size: 200%;
+
+}
+
+.articleUne h4 {
+    display: flex;
+    flex-direction: row;
+    font-size: 125%;
+    margin-bottom: 5px;
+    margin-top: 15px;
+
+}
+
+.articleUne p {
+    font-size: large;
+    gap: 500px;
+}
+
+
+footer  {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 10px;
+    
+  
+}
+
+
+
+/* liste article */
+.listeArticles {
+    width: 90%;
+    margin-left: 20px;
+    text-align: justify;
+}
+
+.listeArticles hr {
+    width: 30%;
+    margin: auto;
+   
+}
+
+.articlePreview {
+    cursor: pointer;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    
+   
+    
+}
+
+.articlePreview:hover {
+    background-color: rgb(221, 211, 178);
+
+}
+.pseudoArticle {
+    font-size: smaller;
+    font-style: italic;
+    padding-top: 5px;
+}
+
+.filtrer {
+    cursor: pointer;
+    padding: 10px;
+    display: inline-block;
+}
+
+.filtrer::after {
+    content: " | ";
+}
+
+.filtrer:hover {
+    background-color: rgb(221, 211, 178);
+}
+
+.menuFiltre {
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(221, 211, 178);
+}
+
+.menuFiltre span {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s linear, opacity 0.3s ease-out;
+   
+}
+
+.menuFiltre .filtrer:hover {
+    color: grey;
+}
+
+#menuCategorie {
+    background-color: rgb(221, 211, 178);
+}
+
+#menuCategorie p:hover {
+    color: grey;
+}
+.choixHidden {
+    opacity: 0;
+    transform: translate3d(100vw, 0, 0);
+   
+    
+}
+
+.choixFiltre {
+    opacity: 1;
+    transform: translate3d(0vw, 0, 0);
+   
+
+}
+
+.science, .devPerso {
+    cursor: pointer;
+}
+
+.resetFilter {
+    cursor: pointer;
+}
+/* article choisi par l'user */
+.article {
+    width: 55%;
+    margin: auto;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+.article h3 {
+    font-size: 200%;
+    margin-bottom: 10px;
+
+}
+
+.article h4 {
+    display: flex;
+    flex-direction: row;
+    font-size: 125%;
+    margin-bottom: 5px;
+    margin-top: 30px;
+
+}
+
+.article p {
+    font-size: large;
+    gap: 500px;
+}
+
+
+/* exercice de respiration */
+
+.exercice {
+    margin-bottom: 100px;
+   
+
+}
+
+.exercice h2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 300%;
+    margin-bottom: 65px;
+
+}
+
+.cercle {
+    height: 250px;
+    width: 250px;
+    border: 1px solid black;
+    margin: auto;
+    border-radius: 1000px;
+    background-color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border 1s ease;
+    
+}
+
+
+
+.cercle:hover {
+    background-color: rgb(49, 46, 46);
+    border: 1px solid rgb(49, 46, 46);
+}
+
+.cercleAnimation {
+    animation: cercleQuiGrossit 15s infinite;
+}
+
+@keyframes cercleQuiGrossit {
+    0% {transform: scale (1);}
+    33.333% {transform: scale(1.5); }
+    100% {transform: scale(1)}
+}
