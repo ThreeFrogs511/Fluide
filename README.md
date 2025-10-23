@@ -7,8 +7,8 @@ This project is an evolving work-in-progress designed as both a **technical play
 
 ## Screenshots
 
-![homepage](https://imgur.com/a/d58raxx)
-![demo](https://imgur.com/a/HSDVk3d)
+![homepage](https://i.imgur.com/tgIo4LX.png)
+![demo](https://i.imgur.com/ZEKnlHF.gif)
 
 --
 
