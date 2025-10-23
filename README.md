@@ -82,11 +82,43 @@ All rights reserved © Nicolas Lavarde.
 
 ---
 
+## 🧩 Installation
+
+### **1. Clone the Repository**
+```bash
+git clone https://github.com/ThreeFrogs511/fluide-et-libre.git
+cd fluide-et-libre
+```
+### **2. Import the Database
+```bash
+Inside the database/ folder, you’ll find a .sql file containing the exported database.
+You can import it into your local SQL server (e.g., phpMyAdmin, MySQL Workbench, or psql)
+```
+
+### **3. Configure Database Connection
+```bash
+Edit your PHP connection file (usually in backend/ or config/) to match your local server credentials:
+$pdo = new PDO('mysql:host=localhost;dbname=fluide_et_libre', 'root', '');
+
+or for PostgreSQL:
+$pdo = new PDO('pgsql:host=localhost;port=5432;dbname=fluide_et_libre', 'postgres', 'yourpassword');
+```
+
+### **4. Run Locally
+```bash
+Start a local PHP server:
+
+php -S localhost:8000
+
+Then open your browser and go to:
+
+http://localhost:8000
+````
+
+---
+
 ## 👤 Author
 
 **Nicolas Lavarde**  
 Web Developer (PHP / JavaScript / SQL)  
 [GitHub – ThreeFrogs511](https://github.com/ThreeFrogs511)
-.gitignore.txt → ignored files
-index.php → main entry point with dynamic content loading
-package.json → project dependencies and metadata
