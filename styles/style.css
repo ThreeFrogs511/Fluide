@@ -104,7 +104,7 @@ nav a:hover {
   .hamburger-inner::before,
   .hamburger-inner::after {
     width: 30px;
-    height: 3px;
+    height: 4px;
   }
   
   /* Ajustement de la position verticale des barres */
