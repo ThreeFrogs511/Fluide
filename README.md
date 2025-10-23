@@ -9,7 +9,7 @@ This project is an evolving work-in-progress designed as both a **technical play
 
 ![homepage](https://i.imgur.com/tgIo4LX.png)
 
-![demo](https://i.ibb.co/x8GnLtKt/fluide-demo.gif)
+![exercise](https://i.imgur.com/of1dKMl.jpeg)
 
 
 --
