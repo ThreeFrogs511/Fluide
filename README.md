@@ -5,6 +5,13 @@ This project is an evolving work-in-progress designed as both a **technical play
 
 ---
 
+## Screenshots
+
+![homepage](https://imgur.com/a/d58raxx)
+![demo](https://imgur.com/a/HSDVk3d)
+
+--
+
 ## 🧠 Overview
 
 **Fluide et Libre** is a minimalist blog application combining front-end interactivity and a dynamic PHP/SQL backend.  
