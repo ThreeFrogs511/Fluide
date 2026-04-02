@@ -32,7 +32,7 @@ fluide/
 ├── app/
 │   ├── layout.tsx                  # Global shell — navbar + footer
 │   ├── page.tsx                    # Homepage — article list + search
-│   ├── globals.css                 # Tailwind base + tokens
+│   ├── globals.css                 # Tailwind base — warm off-white background (#F0EAD6), base typography via @layer base
 │   ├── about/
 │   │   └── page.tsx
 │   ├── articles/
@@ -46,6 +46,7 @@ fluide/
 ├── components/
 │   ├── Navbar.tsx
 │   ├── ArticleCard.tsx
+│   ├── FilterableArticleList.tsx   # Search input + filtered article list (client component)
 │   └── exercises/
 │       ├── BreathingWidget.tsx     # Box breathing exercise
 │       └── ...                     # Future exercise components
@@ -67,7 +68,9 @@ fluide/
 
 ### Article data flow
 
-`content/articles.json` → `lib/articles.ts` → page components
+**Phase 1 (current):** articles are hardcoded directly inside `app/page.tsx` and `app/articles/[slug]/page.tsx`. `lib/articles.ts` exists but returns empty arrays — it is not yet wired up.
+
+**Phase 2 target:** `content/articles.json` → `lib/articles.ts` → page components
 
 `lib/articles.ts` exposes two functions:
 - `getArticles()` — returns all articles
@@ -92,8 +95,9 @@ Unknown slugs call `notFound()` to trigger the built-in 404 page.
 ### `'use client'` policy
 
 Only use `'use client'` where strictly necessary:
-- Search input on the article list (client-side filtering)
-- Breathing widget (uses timers and React state)
+- `components/Navbar.tsx` — uses `usePathname` from `next/navigation` to highlight the active link
+- `components/FilterableArticleList.tsx` — owns the search query state (`useState`) and renders filtered `ArticleCard` list; kept as a single client component so `app/page.tsx` can remain a server component
+- `components/exercises/BreathingWidget.tsx` — will use timers and React state (not yet implemented)
 
 Everything else is a server component by default.
 
