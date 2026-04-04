@@ -1,5 +1,7 @@
 import FilterableArticleList from '@/components/FilterableArticleList'
 
+
+//hardcoded placeholder article list for now, but eventually this will be fetched from a CMS or database
 const articles = [
   {
     slug: 'learning-to-breathe',

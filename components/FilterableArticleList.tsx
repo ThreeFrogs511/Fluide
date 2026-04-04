@@ -2,21 +2,17 @@
 
 import { useState } from 'react'
 import ArticleCard from './ArticleCard'
-
-type Article = {
-  slug: string
-  title: string
-  date: string
-  excerpt: string
-}
+import type { Article } from '@/lib/types'
 
 type Props = {
   articles: Article[]
 }
 
 export default function FilterableArticleList({ articles }: Props) {
+  // State for the search query
   const [query, setQuery] = useState('')
 
+  // Filter articles based on the search query
   const filtered = query.trim()
     ? articles.filter(
         (a) =>
@@ -32,6 +28,7 @@ export default function FilterableArticleList({ articles }: Props) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search articles..."
+        aria-label="Search articles"
         className="w-full bg-transparent border-b border-neutral-400 py-2 text-base placeholder:text-neutral-400 focus:outline-none focus:border-neutral-800 transition-colors mb-2"
       />
       <div>
