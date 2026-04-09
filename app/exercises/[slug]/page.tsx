@@ -1,46 +1,42 @@
 import { notFound } from 'next/navigation'
+import { exercises, getExercise } from '@/lib/exercises'
+import ScrollToWidget from '@/components/exercises/ScrollToWidget'
 
-type Exercise = {
-  slug: string
-  title: string
-  description: string
-  duration: string
-}
-
-const exercises: Exercise[] = [
-  {
-    slug: 'box-breathing',
-    title: 'Box Breathing',
-    description:
-      'A simple four-part breath cycle to calm the nervous system and reset before speaking.',
-    duration: '5 min',
-  },
-]
-
+// Tells Next.js which slugs exist at build time so it can pre-render them as static HTML.
+// Returns [{ slug: 'cyclic-sighing' }, ...] — one object per registered exercise.
+// Unknown slugs (not in this list) fall through to notFound() below.
 export function generateStaticParams(): { slug: string }[] {
   return exercises.map((e) => ({ slug: e.slug }))
 }
 
-export default function ExercisePage({
+// In Next.js 16 App Router, `params` is a Promise — it must be awaited.
+// The function must be async because of this.
+export default async function ExercisePage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  const exercise = exercises.find((e) => e.slug === params.slug)
+  const { slug } = await params
+  const exercise = getExercise(slug)
 
   if (!exercise) notFound()
 
+
+  const ExerciseComponent = exercise.component
+
   return (
     <div className="max-w-2xl">
-      <header className="mb-10">
+      <header className="mb-12">
         <h1 className="mb-3">{exercise.title}</h1>
         <p className="text-neutral-600 text-lg leading-relaxed">
           {exercise.description}
         </p>
-        <p className="text-sm text-neutral-500 mt-3">{exercise.duration}</p>
+        <p className="text-sm text-neutral-500">{exercise.duration}</p>
+        <ScrollToWidget />
       </header>
-      <div className="border border-neutral-300 rounded-sm p-10 text-center text-neutral-400 text-sm">
-        Exercise widget renders here
+      {/* id="widget" is the scroll target for the ScrollToWidget button above */}
+      <div id="widget">
+        <ExerciseComponent />
       </div>
     </div>
   )

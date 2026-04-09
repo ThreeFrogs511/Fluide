@@ -1,14 +1,7 @@
 import Link from 'next/link'
-
-const exercises = [
-  {
-    slug: 'box-breathing',
-    title: 'Box Breathing',
-    description:
-      'A simple four-part breath cycle to calm the nervous system and reset before speaking.',
-    duration: '5 min',
-  },
-]
+// Reading directly from the registry — no local array, no JSON file.
+// When a new exercise is added to lib/exercises.ts, it appears here automatically.
+import { exercises } from '@/lib/exercises'
 
 export default function ExercisesPage() {
   return (
