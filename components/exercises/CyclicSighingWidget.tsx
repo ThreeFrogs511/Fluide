@@ -122,8 +122,9 @@ export default function CyclicSighingWidget() {
 
       // Write directly to the DOM element's style through refs, bypassing React's render cycle for better performance.
       // transform: scale() is used instead of width/height to avoid triggering browser layout on every frame.
+      // Base is 80px (the rest size), so scale(1) = 80px rest, scale(2) = 160px max.
       if (circleRef.current) {
-        circleRef.current.style.transform = `scale(${size / 160})`
+        circleRef.current.style.transform = `scale(${size / 80})`
         circleRef.current.style.backgroundColor = color
       }
 
@@ -179,7 +180,7 @@ export default function CyclicSighingWidget() {
   // Written via ref.current.style rather than setState to match the animation pattern.
   const resetCircle = useCallback(() => {
     if (circleRef.current) {
-      circleRef.current.style.transform = 'scale(0.5)' // 80 / 160 = 0.5 (rest size)
+      circleRef.current.style.transform = 'scale(1)' // 80 / 80 = 1 (rest size)
       circleRef.current.style.backgroundColor = '#B4B2A9'
     }
   }, [])
@@ -249,15 +250,15 @@ export default function CyclicSighingWidget() {
 
         {/* Fixed 180×180 wrapper keeps the card stable as the circle grows and shrinks */}
         <div className="w-45 h-45 flex items-center justify-center mb-8">
-          {/* Circle is fixed at 160px (its maximum size) so width/height never change.
-              Size is animated via transform: scale() — this avoids layout on every frame.
-              scale-50 sets the rest-state (80 / 160 = 0.5). will-change promotes the element
-              to its own compositing layer, isolating its repaints from the rest of the document.
+          {/* Circle is fixed at 80px (its rest size) so layout never changes.
+              Size is animated via transform: scale() relative to that base — this avoids
+              layout on every frame. will-change promotes the element to its own compositing
+              layer, isolating its repaints from the rest of the document.
               Once the animation starts, requestAnimationFrame overrides transform/backgroundColor
               via ref.current.style on every frame. */}
           <div
             ref={circleRef}
-            className="rounded-full w-40 h-40 bg-[#B4B2A9] scale-50 will-change-[transform,background-color]"
+            className="rounded-full w-20 h-20 bg-[#B4B2A9] will-change-[transform,background-color]"
           />
         </div>
 
