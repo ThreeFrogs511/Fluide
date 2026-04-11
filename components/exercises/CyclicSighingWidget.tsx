@@ -38,13 +38,17 @@ const PHASES = [
 
 const TOTAL_CYCLES = 25
 
-// Linear interpolation: returns the value that is `t` (0–1) of the way from `a` to `b`.
-// t=0 → a, t=1 → b, t=0.5 → midpoint. No easing — pure linear is intentional here.
+// returns the size of the circle and/or the circle color at an instant t  
+//a = circle size/color start value, b = circle size/color end value, t = progress (0 to 1), calculated in the tick function
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t
 }
 
-// Splits a hex color string (#RRGGBB) into its three RGB channels as integers.
+// converts an hex color at an instant T into RGB values in order to do math with (can't do that with HEX directly)
+//How it works: slices the hex colour into three pairs
+//then converts each pair from hex to decimal using parseInt with a radix of 16 (hexadecimal)
+//e.g. #B4B2A9 becomes [180, 178, 169]
+//
 function hexToRgb(hex: string): [number, number, number] {
   return [
     parseInt(hex.slice(1, 3), 16),
@@ -53,8 +57,12 @@ function hexToRgb(hex: string): [number, number, number] {
   ]
 }
 
-// Lerps each RGB channel independently between two hex colors.
-// Returns a CSS rgb() string that the browser can apply directly.
+// Uses lerp() and hexToRgb() to return the color of the circle at an instant t 
+// First, we convert the start and end hex colors to RGB using hexToRgb().
+//Then we use lerp() to determine the red, green, and blue components separately based on the progress t (for the color transition).
+//Finally, we construct an RGB color string in the format "rgb(r, g, b)" to be used in the circle's style.
+//colorA = start color, colorB = end color, t = progress (0 to 1)
+//color A and color B stays the same for the entire phase, only t changes and determines the color at a specific moment in the phase
 function lerpColor(colorA: string, colorB: string, t: number): string {
   const [r1, g1, b1] = hexToRgb(colorA)
   const [r2, g2, b2] = hexToRgb(colorB)
@@ -71,9 +79,9 @@ export default function CyclicSighingWidget() {
 
   // --- Refs (never cause re-renders — used to drive the animation loop) ---
 
-  // Direct reference to the circle DOM element so we can mutate its style each frame.
+  // Used to change the circle DOM element without causing rerenders
   const circleRef = useRef<HTMLDivElement>(null)
-  // ID returned by requestAnimationFrame — needed to cancel the loop on pause/stop/unmount.
+  // ID returned by requestAnimationFrame — needed to cancel the tick loop on pause/stop/unmount.
   const rafIdRef = useRef<number>(0)
   // Which phase we are currently in (0 = first inhale, 1 = second inhale, 2 = exhale).
   const phaseIndexRef = useRef(0)
@@ -85,16 +93,18 @@ export default function CyclicSighingWidget() {
   // How many milliseconds had elapsed in the current phase when the user paused.
   // Used to resume from exactly where we left off.
   const pausedElapsedRef = useRef(0)
-  // The tick function itself stored in a ref. This solves a JavaScript scoping problem:
-  // a `const` function cannot reference itself recursively inside useCallback,
-  // so instead it calls tickRef.current — which by the time it runs, points to itself.
+
   const tickRef = useRef<((timestamp: number) => void) | undefined>(undefined)
 
   // --- Animation loop ---
 
+  //this is where the magic happens
+  //this main function calculates the size and color of the circle at any given moment in time (timestamp) 
+  // based on which phase we are in and how far through that phase we are (t).
+  // we call this function on every frame via requestAnimationFrame
+
   useEffect(() => {
-    // Defined inside useEffect so it is only created once (empty deps []).
-    // All values it reads are through refs, so it never goes stale.
+
     tickRef.current = (timestamp: number) => {
       // On the very first tick, record the phase start time.
       if (phaseStartRef.current === null) {
@@ -106,21 +116,20 @@ export default function CyclicSighingWidget() {
       // t is a 0–1 progress value. Math.min clamps it so it never exceeds 1.
       const t = Math.min(elapsed / phase.duration, 1)
 
-      // Compute the interpolated size and color for this exact frame.
+      // Calculate the size and color of the circle for this exact frame.
       const size = lerp(phase.startSize, phase.endSize, t)
       const color = lerpColor(phase.startColor, phase.endColor, t)
 
-      // Write directly to the DOM element's style — bypassing React's render cycle.
-      // This is the correct approach for smooth 60fps animation; setState would be too slow.
+      // Write directly to the DOM element's style through refs, bypassing React's render cycle for better performance.
+      // transform: scale() is used instead of width/height to avoid triggering browser layout on every frame.
       if (circleRef.current) {
-        circleRef.current.style.width = `${size}px`
-        circleRef.current.style.height = `${size}px`
+        circleRef.current.style.transform = `scale(${size / 160})`
         circleRef.current.style.backgroundColor = color
       }
 
       // Phase transition: once t reaches 1, the phase is complete.
       if (t >= 1) {
-        const nextPhaseIndex = phaseIndexRef.current + 1
+        const nextPhaseIndex = phaseIndexRef.current + 1 // next phase
 
         if (nextPhaseIndex >= PHASES.length) {
           // We finished the last phase (exhale) — that's one full cycle.
@@ -141,8 +150,8 @@ export default function CyclicSighingWidget() {
           phaseIndexRef.current = nextPhaseIndex
         }
 
-        // Reset the phase start time to this frame's timestamp.
-        phaseStartRef.current = timestamp
+        // Carry any overshoot forward into the next phase so timing stays accurate across all 75 transitions.
+        phaseStartRef.current = (phaseStartRef.current ?? timestamp) + phase.duration
         // Update the UI labels for the new phase.
         const newPhase = PHASES[phaseIndexRef.current]
         setPhaseLabel(newPhase.label)
@@ -170,8 +179,7 @@ export default function CyclicSighingWidget() {
   // Written via ref.current.style rather than setState to match the animation pattern.
   const resetCircle = useCallback(() => {
     if (circleRef.current) {
-      circleRef.current.style.width = '80px'
-      circleRef.current.style.height = '80px'
+      circleRef.current.style.transform = 'scale(0.5)' // 80 / 160 = 0.5 (rest size)
       circleRef.current.style.backgroundColor = '#B4B2A9'
     }
   }, [])
@@ -241,12 +249,15 @@ export default function CyclicSighingWidget() {
 
         {/* Fixed 180×180 wrapper keeps the card stable as the circle grows and shrinks */}
         <div className="w-45 h-45 flex items-center justify-center mb-8">
-          {/* Tailwind classes set the rest-state appearance.
-              Once the animation starts, requestAnimationFrame overrides width/height/backgroundColor
-              via ref.current.style on every frame — the Tailwind classes are just the fallback. */}
+          {/* Circle is fixed at 160px (its maximum size) so width/height never change.
+              Size is animated via transform: scale() — this avoids layout on every frame.
+              scale-50 sets the rest-state (80 / 160 = 0.5). will-change promotes the element
+              to its own compositing layer, isolating its repaints from the rest of the document.
+              Once the animation starts, requestAnimationFrame overrides transform/backgroundColor
+              via ref.current.style on every frame. */}
           <div
             ref={circleRef}
-            className="rounded-full w-20 h-20 bg-[#B4B2A9]"
+            className="rounded-full w-40 h-40 bg-[#B4B2A9] scale-50 will-change-[transform,background-color]"
           />
         </div>
 
