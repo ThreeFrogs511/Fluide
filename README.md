@@ -1,8 +1,8 @@
 # Fluide
 
-A personal blog and interactive wellness platform exploring stuttering, breathing techniques, and fluency — built with Next.js and TypeScript.
+A personal blog and interactive wellness platform exploring stuttering, breathing techniques, and fluency — built with Next.js, PostgreSQL, and TypeScript.
 
-Available here : https://fluide-mu.vercel.app/
+**Live:** https://fluide-mu.vercel.app/
 
 ---
 
@@ -10,35 +10,41 @@ Available here : https://fluide-mu.vercel.app/
 
 Fluide is a space to write about stuttering and fluency from lived experience — documenting techniques that work, research findings, and building interactive tools for mindfulness and breathing practice.
 
+The project ships with a full content management system, allowing new articles and exercises to be published directly from the admin dashboard without touching code.
+
 ---
 
 ## Features
 
-### Phase 1 (Current)
-- **Article list** with live client-side search
-- **Individual article pages** with full content
-- **Interactive breathing exercise** — box breathing with animated visual guide
+### Public (Phase 1 ✅ Complete)
+- **Article list** with live client-side search and filtering
+- **Individual article pages** with full content, published server-side
+- **Interactive breathing exercise** — Cyclic Sighing with animated visual guide and timer
+- **Exercise index** — registry of all breathing/wellness exercises
 - **About page**
-- Fully static, deployed on Vercel
-- Data stored in local JSON files
+- Deployed on Vercel
 
-### Phase 2 (Planned)
-- Admin authentication via NextAuth.js
-- CMS for article management (create, edit, publish, delete)
-- Database-backed articles (PostgreSQL via Vercel Postgres)
-- Admin dashboard protected by middleware
+### Admin CMS (Phase 2 ✅ Complete)
+- **Secure authentication** — NextAuth.js v5 (Credentials provider, admin-only)
+- **Article management** — create, edit, publish/unpublish, delete articles
+- **Admin dashboard** — view all articles with status badges (published/draft)
+- **Database-backed** — PostgreSQL via Vercel Postgres + Prisma 7 ORM
+- **Route protection** — all `/admin/*` routes protected by middleware
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Notes |
-|---|---|---|
-| Framework | Next.js 16 (App Router) | Deployed on Vercel |
-| Language | TypeScript | Strict typing, no `any` |
-| Styling | Tailwind CSS | Utility-first, responsive design |
-| Data | JSON (Phase 1) → PostgreSQL (Phase 2) | Prisma ORM planned |
-| Auth | None (Phase 1) → NextAuth.js v5 (Phase 2) | Admin-only, single user |
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript (strict mode, no `any`) |
+| Styling | Tailwind CSS |
+| ORM | Prisma 7 (`PrismaPg` adapter) |
+| Database | PostgreSQL (Vercel Postgres / Neon) |
+| Authentication | Auth.js v5 (NextAuth.js) |
+| Route Protection | Next.js 16 `proxy.ts` |
+| Deployment | Vercel |
 
 ---
 
@@ -61,15 +67,28 @@ Fluide is a space to write about stuttering and fluency from lived experience �
    npm install
    ```
 
-3. **Run the development server**
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Fill in:
+   - `DATABASE_URL` — Vercel Postgres connection string
+   - `AUTH_SECRET` — generate with `npx auth secret`
+   - `ADMIN_EMAIL` and `ADMIN_PASSWORD` — your admin credentials
+
+4. **Run Prisma migrations** (if needed)
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
+6. **Open in browser**
+   - Public site: http://localhost:3000
+   - Admin login: http://localhost:3000/admin/login
 
 ---
 
@@ -77,80 +96,118 @@ Fluide is a space to write about stuttering and fluency from lived experience �
 
 ```
 fluide/
-├── app/                      # Next.js App Router — every folder = a route
-│   ├── layout.tsx            # Global shell: navbar + footer
-│   ├── page.tsx              # Homepage: article list + search
-│   ├── about/page.tsx        # /about
-│   ├── articles/[slug]/      # /articles/:slug (dynamic, static generation)
-│   └── exercises/[slug]/     # /exercises/:slug (dynamic, static generation)
+├── app/                           # Next.js App Router — every folder = a route
+│   ├── layout.tsx                 # Global shell: navbar + footer
+│   ├── page.tsx                   # Homepage: article list + search
+│   ├── not-found.tsx              # Custom 404 page
+│   ├── about/page.tsx             # /about
+│   ├── articles/[slug]/page.tsx   # /articles/:slug — server-rendered from DB
+│   ├── exercises/
+│   │   ├── page.tsx               # /exercises — exercise index
+│   │   └── [slug]/page.tsx        # /exercises/:slug — individual exercise
+│   ├── (admin)/                   # Protected admin routes
+│   │   ├── layout.tsx             # Admin shell
+│   │   ├── page.tsx               # /admin — dashboard (article list)
+│   │   ├── login/page.tsx         # /admin/login — Auth.js login form
+│   │   └── articles/
+│   │       ├── new/page.tsx       # /admin/articles/new — create article
+│   │       └── [slug]/edit/page.tsx # /admin/articles/[slug]/edit — edit/delete
+│   └── api/
+│       └── auth/[...nextauth]/route.ts # Auth.js route handler
 │
 ├── components/
-│   ├── Navbar.tsx            # Site navigation
-│   ├── ArticleCard.tsx       # Card on article list
+│   ├── Navbar.tsx                 # Site navigation
+│   ├── ArticleCard.tsx            # Card displayed on article list
+│   ├── FilterableArticleList.tsx  # Client-side search/filter (homepage)
 │   └── exercises/
-│       └── BreathingWidget.tsx  # Box breathing exercise
+│       ├── CyclicSighingWidget.tsx   # Cyclic Sighing exercise
+│       └── ScrollToWidget.tsx       # Scroll-to exercise component
 │
 ├── lib/
-│   ├── articles.ts           # getArticles(), getArticle(slug)
-│   ├── exercises.ts          # Exercise registry, getExercise(slug)
-│   └── utils.ts              # Shared helpers
+│   ├── articles.ts                # All Prisma operations (read + write)
+│   ├── exercises.ts               # Exercise registry, getExercise(slug)
+│   ├── prisma.ts                  # Prisma client singleton
+│   ├── actions.ts                 # Server Actions (article mutations)
+│   └── types.ts                   # Shared TypeScript types
 │
-├── content/
-│   └── articles.json         # Article data (deleted in Phase 2)
+├── prisma/
+│   ├── schema.prisma              # Article model definition
+│   └── migrations/                # Migration history
+│
+├── auth.ts                        # Auth.js configuration
+├── proxy.ts                       # Route protection middleware (Next.js 16)
+├── prisma.config.ts               # Prisma 7 configuration
 │
 └── public/
-    └── images/               # Article covers, OG images
+    ├── favicon.ico
+    └── images/                    # Article covers, OG images
 ```
 
 ---
 
 ## How it works
 
-### Articles
-1. **JSON source** → stored in `content/articles.json`
-2. **Access layer** → `lib/articles.ts` exports `getArticles()` and `getArticle(slug)`
-3. **Pages** → `app/articles/[slug]/page.tsx` renders individual articles
-4. **Static generation** → `generateStaticParams()` pre-renders all articles at build time
+### Articles (database-backed)
 
-**Phase 2 change:** Only `lib/articles.ts` changes — it reads from Prisma instead. No page components are affected.
+1. **Data source** → PostgreSQL (via Vercel Postgres)
+2. **Access layer** → `lib/articles.ts` exposes read queries (`getArticles()`, `getArticle()`) and write operations (`createArticle()`, `updateArticle()`, `deleteArticle()`)
+3. **Server Actions** → `lib/actions.ts` wraps mutations with error handling and redirects
+4. **Pages**:
+   - Public: `app/page.tsx` calls `getArticles()` for the homepage list
+   - Public: `app/articles/[slug]/page.tsx` calls `getArticle(slug)` — server-rendered
+   - Admin: `app/(admin)/page.tsx` calls `getAllArticles()` to show drafts + published
+   - Admin: Forms in `/new` and `/edit` call Server Actions to save changes
 
-### Exercises
-1. **Registry** → defined in `lib/exercises.ts` (single source of truth)
-2. **Components** → stored in `components/exercises/` (e.g., `BreathingWidget.tsx`)
+### Exercises (registry-based, not database-backed)
+
+1. **Registry** → hardcoded in `lib/exercises.ts` (single source of truth)
+2. **Components** → stored in `components/exercises/`
 3. **Pages** → `app/exercises/[slug]/page.tsx` renders each exercise
-4. **Adding a new exercise** → create component + add one entry to registry (that's it)
+4. **Adding a new exercise** → create component + add one entry to the `exercises[]` array (that's it)
+
+### Authentication
+
+1. **Config** → `auth.ts` (Auth.js v5, Credentials provider)
+2. **Credentials** → stored in `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD`)
+3. **Route handler** → `app/api/auth/[...nextauth]/route.ts`
+4. **Protection** → `proxy.ts` redirects unauthenticated users away from `/admin/*`
+5. **Session** → Auth.js manages a cookie-based session
 
 ---
 
 ## What I learned building this
 
-- Static generation with `generateStaticParams` — pre-rendering dynamic routes at build time
-- Building interactive React components — managing state, timers, and animations
+### Phase 1
+- Next.js App Router and dynamic routes with `[slug]`
+- Static generation with `generateStaticParams` vs. server-rendering
+- Building interactive React components — managing state, timers, animations
 - TypeScript discipline — enforcing strict typing across the full stack
 - Modular architecture — separating data access (`lib/`) from presentation (`components/`)
-- Deployment automation — zero-config deployments from GitHub to Vercel
+- Client-side filtering and search in React
+
+### Phase 2
+- Prisma 7 with driver adapters (`PrismaPg`)
+- Auth.js v5 (NextAuth.js) — credentials provider, sessions, cookies
+- PostgreSQL via Vercel Postgres — schema design and migrations
+- Server Actions — mutations without API routes
+- Route protection via middleware (Next.js 16 `proxy.ts`)
+- Separation of concerns — `lib/articles.ts` (data), `lib/actions.ts` (mutations), pages (presentation)
 
 ---
 
-## Next steps
+## Next steps (Phase 3 — future)
 
-1. Add 1–2 more interactive exercises
-2. Expand content to 10+ articles
-3. Begin Phase 2 — authentication and CMS
-
----
-
-## Technologies
-
-- **Prisma** — next-generation ORM for database access
-- **NextAuth.js** — enterprise-grade authentication system
-- **PostgreSQL + Vercel** — production database infrastructure
+- Dark mode support
+- Rich text editor for article body (Markdown preview)
+- More interactive exercises
+- Analytics dashboard
+- Public user accounts (future expansion)
 
 ---
 
 ## About me
 
-**Nicolas Lavarde** — Full-stack developer specializing in modern web applications.
+**Nicolas Lavarde** — Full-stack developer building modern web applications with a focus on clean code and user-centered design.
 
 Other projects:
 - **Questmaker2** — [questmaker2.vercel.app](https://questmaker2.vercel.app) — Interactive RPG mechanics application with virtual currency and rate limiting
@@ -159,13 +216,12 @@ Other projects:
 
 ## License
 
-This project is personal and open source. See `LICENSE` for details.
+This project is personal and open source.
 
 ---
 
 ## Get in touch
 
-Found a bug? Have suggestions? Feel free to open an issue or reach out.
-
 - GitHub: [@ThreeFrogs511](https://github.com/ThreeFrogs511)
-- LinkedIn: [nicolaslavarde](https://www.linkedin.com/in/nicolas-lavarde-68999837b/) 
+- LinkedIn: [nicolaslavarde](https://www.linkedin.com/in/nicolas-lavarde-68999837b/)
+- Email: Available on request

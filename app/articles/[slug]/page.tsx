@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { getArticle } from '@/lib/articles'
 
+export const revalidate = 0
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
   return date.toLocaleDateString('en-US', {
