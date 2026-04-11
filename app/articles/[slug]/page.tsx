@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getArticle, getArticles } from '@/lib/articles'
-
+import { getArticle } from '@/lib/articles'
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
@@ -11,20 +10,15 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export function generateStaticParams(): { slug: string }[] {
-  const articles = getArticles();
-  return articles.map((a) => ({ slug: a.slug }));
-}
-
 export default async function ArticlePage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const { slug } = await params;
-  const article = getArticle(slug);
+  const { slug } = await params
+  const article = await getArticle(slug)
 
-  if (!article) notFound();
+  if (!article) notFound()
 
   return (
     <article className="max-w-2xl">
