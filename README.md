@@ -2,6 +2,8 @@
 
 A personal blog and interactive wellness platform exploring stuttering, breathing techniques, and fluency — built with Next.js and TypeScript.
 
+Available here : https://fluide-mu.vercel.app/
+
 ---
 
 ## Overview
@@ -40,7 +42,7 @@ Fluide is a space to write about stuttering and fluency from lived experience �
 
 ---
 
-## Running locally
+## How to run locally
 
 ### Prerequisites
 - Node.js 20.9+
@@ -132,10 +134,9 @@ fluide/
 
 ## Next steps
 
-1. **Deploy on Vercel** ✅ (in progress)
-2. Add 1–2 more interactive exercises
-3. Expand content to 10+ articles
-4. Begin Phase 2 — authentication and CMS
+1. Add 1–2 more interactive exercises
+2. Expand content to 10+ articles
+3. Begin Phase 2 — authentication and CMS
 
 ---
 
