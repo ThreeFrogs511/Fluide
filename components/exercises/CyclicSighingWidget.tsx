@@ -79,8 +79,8 @@ export default function CyclicSighingWidget() {
 
   // --- Refs (never cause re-renders — used to drive the animation loop) ---
 
-  // Used to change the circle DOM element without causing rerenders
-  const circleRef = useRef<HTMLDivElement>(null)
+  // Used to change the SVG circle element without causing rerenders
+  const circleRef = useRef<SVGCircleElement>(null)
   // ID returned by requestAnimationFrame — needed to cancel the tick loop on pause/stop/unmount.
   const rafIdRef = useRef<number>(0)
   // Which phase we are currently in (0 = first inhale, 1 = second inhale, 2 = exhale).
@@ -120,12 +120,12 @@ export default function CyclicSighingWidget() {
       const size = lerp(phase.startSize, phase.endSize, t)
       const color = lerpColor(phase.startColor, phase.endColor, t)
 
-      // Write directly to the DOM element's style through refs, bypassing React's render cycle for better performance.
-      // transform: scale() is used instead of width/height to avoid triggering browser layout on every frame.
-      // Base is 80px (the rest size), so scale(1) = 80px rest, scale(2) = 160px max.
+      // Write directly to the SVG circle element via setAttribute, bypassing React's render cycle.
+      // r is the radius (size / 2 converts diameter to radius). fill sets the colour.
+      // SVG renders as vector — no pixel interpolation at any size.
       if (circleRef.current) {
-        circleRef.current.style.transform = `scale(${size / 80})`
-        circleRef.current.style.backgroundColor = color
+        circleRef.current.setAttribute('r', String(size / 2))
+        circleRef.current.setAttribute('fill', color)
       }
 
       // Phase transition: once t reaches 1, the phase is complete.
@@ -177,11 +177,11 @@ export default function CyclicSighingWidget() {
   }, [])
 
   // Resets the circle's visual appearance back to the rest state.
-  // Written via ref.current.style rather than setState to match the animation pattern.
+  // Written via setAttribute to match the animation pattern.
   const resetCircle = useCallback(() => {
     if (circleRef.current) {
-      circleRef.current.style.transform = 'scale(1)' // 80 / 80 = 1 (rest size)
-      circleRef.current.style.backgroundColor = '#B4B2A9'
+      circleRef.current.setAttribute('r', '40') // rest diameter 80px / 2
+      circleRef.current.setAttribute('fill', '#B4B2A9')
     }
   }, [])
 
@@ -250,16 +250,22 @@ export default function CyclicSighingWidget() {
 
         {/* Fixed 180×180 wrapper keeps the card stable as the circle grows and shrinks */}
         <div className="w-45 h-45 flex items-center justify-center mb-8">
-          {/* Circle is fixed at 80px (its rest size) so layout never changes.
-              Size is animated via transform: scale() relative to that base — this avoids
-              layout on every frame. will-change promotes the element to its own compositing
-              layer, isolating its repaints from the rest of the document.
-              Once the animation starts, requestAnimationFrame overrides transform/backgroundColor
-              via ref.current.style on every frame. */}
-          <div
-            ref={circleRef}
-            className="rounded-full w-20 h-20 bg-[#B4B2A9] will-change-[transform,background-color]"
-          />
+          {/* SVG viewport is fixed at 160×160px (the circle's maximum diameter).
+              cx/cy are fixed at the centre (80, 80). The animation drives r (radius)
+              and fill via setAttribute on every frame — same ref pattern as before.
+              SVG renders as vector so the circle stays crisp at every size. */}
+          <svg
+            className="w-40 h-40"
+            viewBox="0 0 160 160"
+          >
+            <circle
+              ref={circleRef}
+              cx="80"
+              cy="80"
+              r="40"
+              fill="#B4B2A9"
+            />
+          </svg>
         </div>
 
         {/* Phase label — changes at the start of each phase */}
