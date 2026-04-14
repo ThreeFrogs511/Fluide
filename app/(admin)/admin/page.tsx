@@ -10,6 +10,9 @@ function formatDate(dateStr: string): string {
   })
 }
 
+// Dans n'importe quel fichier existant, ajoute temporairement :
+const x: number = "ceci est une erreur"
+
 export default async function AdminPage() {
   const articles = await getAllArticles()
 
