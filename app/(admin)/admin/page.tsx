@@ -8,8 +8,8 @@ function formatDate(dateStr: string): string {
     month: 'long',
     day: 'numeric',
   })
-}
-
+}   
+  
 
 
 export default async function AdminPage() {
